@@ -1,8 +1,13 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import {Schema as MongooseSchema} from 'mongoose'
 class Request{
-    userId:string
+    EmmiterId:string
+    ReceptorId:string
     DateSent:Date
+}
+class Friend{
+    FriendId:string
+    ChatId:string
 }
 @Schema()
 export class User{
@@ -14,10 +19,10 @@ email:string
 displayName:string
 @Prop({type:String,default:'https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg'})
 photoURL:string
-@Prop()
-FriendShipRequest:Request[]
-@Prop({type:[Map]})
-Friends:Record<string,string>
+@Prop({type:Request,default:[]})
+FriendshipRequest:Request[]
+@Prop({default:[]})
+Friends:Friend[]
 @Prop({type:Boolean,default:true})
 IsActive:boolean
 }

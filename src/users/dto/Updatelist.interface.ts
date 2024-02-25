@@ -1,4 +1,6 @@
+import { Request } from "./UpdateRequest.dto"
+
 export interface UpdateListDto{
-    list:string[]
+    list:Request[]
     uid:string
 }

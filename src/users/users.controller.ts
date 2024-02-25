@@ -1,8 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Redirect } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Redirect } from "@nestjs/common";
 import { UserService } from "./users.service";
 import { UpdateListDto } from "./dto/Updatelist.interface";
 import { ApiTags } from "@nestjs/swagger";
 import { CreateUserDto } from "./dto/CreateUser.dto.interface";
+import { User } from "./entity/user.entity";
+import { RequestActions } from "./dto/RequestActions.dto";
+import { UpdateUserDto } from "./dto/updateUser.dto.interface";
+import { AddFriend } from "./dto/AddFriend.dto.interface";
 
 
 @ApiTags('Users')
@@ -13,29 +17,32 @@ export class UsersController{
     }
     @Post()
     SaveUser(@Body() user:CreateUserDto){
-        console.log(user)
         return this.UserService.SaveUser(user)
     }
     @Get('list')
     GetUserList(@Query('search') query:string,@Query('except') except:string){
         return this.UserService.getUserList(query,except)
     }
-    @Get('/list:id')
-    getFrindsList(@Param('id') userid:string){
-        return this.UserService.getFriendsList(userid)
-    }
     @Get(':id')
     GetUserbyId(@Param('id') userid:string){
-        console.log(userid)
         return this.UserService.GetUserbyId(userid)
     }
-    @Post('/friends')
-    UpdateFriendsList(@Body() request:UpdateListDto){
+    @Get('full/:id')
+    GetUserFullbyId(@Param('id') userid:string){
+        return this.UserService.GetFullInformation(userid)
+    }
+    @Patch('/friends')
+    AddFriends(@Body() request:AddFriend){
         return this.UserService.UpdateFriendslist(request)
     }
-    @Post('/request')
-    UpdateRequestList(@Body() request:UpdateListDto){
-         return this.UserService.UpdateRequestList(request)
+    @Patch('/SentRequest')
+    SentRequest(@Body() request:RequestActions){
+         return this.UserService.SentRequest(request)
+    }
+    @Patch('/CancelRequest')
+    CancelRequest(@Body() request:RequestActions){
+        console.log(request)
+         return this.UserService.CancelRequest(request)
     }
     @Patch('/status:id')
     UpdateUserStatus(@Param('id') uid:string){
@@ -43,7 +50,6 @@ export class UsersController{
     }
     @Delete(':id')
     DeleteAccount(@Param() userid:string){
-        console.log('eliminar')
         return this.UserService.DeleteAccount(userid)
     }
 }

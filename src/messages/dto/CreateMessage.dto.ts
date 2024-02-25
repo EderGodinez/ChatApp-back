@@ -1,4 +1,4 @@
-import { IsString } from "class-validator"
+import { IsBoolean, IsString } from "class-validator"
 
 export class CreateMessageDto{
     @IsString()
@@ -6,7 +6,7 @@ export class CreateMessageDto{
     @IsString()
     emitterId:string
     @IsString()
-    Receptor:string
+    ReceptorId:string
     @IsString()
     Content:string
 }

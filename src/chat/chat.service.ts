@@ -1,21 +1,64 @@
-import { Injectable } from '@nestjs/common';
+import {  Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateMessageDto } from 'src/messages/dto/CreateMessage.dto';
-import { Chats } from 'src/messages/entites/messages.entity';
-import { v4 as uuidv4} from 'uuid'
+import { User } from 'src/users/entity/user.entity';
+
+import { NotifyProps } from './interfaces/NotifyRemitten.interface';
+import { MessageProperties } from './interfaces/Notify.interface';
 
 @Injectable()
 export class ChatService {
     constructor(
-        @InjectModel(Chats.name)
-        private MessageModel:Model<Chats>){}
-    async saveMessage(payload:CreateMessageDto){
-        const {Receptor,chatId,emitterId}=payload
-        let ChatId:string=chatId
-        if (!chatId) {
-            ChatId=uuidv4()
-        }
-        const Message=await this.MessageModel.create({chatId:ChatId,emitterId:emitterId,Receptor:Receptor,Time:new Date()})
+        @InjectModel(User.name)
+        private UserModel:Model<User>){}
+        //Los valores seran:
+        /*Clave-El socket Id
+          Valor-Uid del usuario
+        */
+        public ActiveUsers:Record<string,string>={}
+    
+     async ConnectUser(uid:string,socketId:string){
+        try {
+           const user= await this.UserModel.findOneAndUpdate({uid:uid},{IsActive:true})
+            this.ActiveUsers[uid]=socketId
+          } catch (error) {
+              throw error
+          }
     }
+     async DisconectUser(socketid:string){
+        try {
+            const uid=this.FoundUserKey(socketid)
+         const user=await this.UserModel.findOneAndUpdate({uid:uid},{IsActive:false})
+            delete this.ActiveUsers[uid]
+        } catch (error) {
+            throw error
+        }
+    }
+    FoundUserKey(socketid:string){
+        for(let key in this.ActiveUsers){
+            if (this.ActiveUsers[key]===socketid) {
+                return key
+            }
+        }
+    }
+    GetSocketId(uid:string){
+        return this.ActiveUsers[uid]
+    }
+    getNotifyMessage(from:NotifyProps,Issue:string):MessageProperties{
+        switch(Issue){
+            case 'Nuevo amigo':
+                return {
+                    Content:`${from.displayName} acepto tu solicitud de amistad`,
+                    ImageUrl:from.photoURL,
+                    Issue
+                }
+            case 'Solicitud de amistad':
+                return {
+                    Content:`${from.displayName} te ah enviado solicitud de amistad`,
+                    ImageUrl:from.photoURL,
+                    Issue
+                }
+        }
+    }
+
 }

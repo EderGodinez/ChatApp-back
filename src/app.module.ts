@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { SingleChatModule } from './chat/chat.module';
+import { ChatModule } from './chat/chat.module';
 import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -7,7 +7,7 @@ import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
-    SingleChatModule,
+    ChatModule,
     UsersModule,
     ConfigModule.forRoot({isGlobal:true}),
     MongooseModule.forRoot(process.env.MONGO_URL),

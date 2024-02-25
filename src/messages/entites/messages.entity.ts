@@ -1,23 +1,19 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import {Schema as MongooseSchema} from 'mongoose'
-enum MessageStatus {
-    Noleido = 'No leido',
-    Leido = 'Leido',
-    Recibido='Recibido'
-  }
-class ReceptorInfo{
-    UserId:string
-    status:MessageStatus
-}
+
+
 @Schema()
-export class Chats{
-@Prop({type:String,_id:true})
+export class Message{
+@Prop({type:String,required:true})//Id del chat al que se emitira el mensaje
 chatId:string
-@Prop({type:MongooseSchema.Types.ObjectId})
+@Prop({type:String,required:true})//Uid de usuario que envia mensaje
 emitterId:string
-@Prop({type:[ReceptorInfo]})
-Receptor:ReceptorInfo[]
-@Prop({type:Date})
+@Prop({type:String,required:true})//Uid de el usuario receptor del mensaje
+ReceptorId:string
+@Prop({type:Date,default:new Date()})
 Time:Date
+@Prop({type:Boolean,default:false})
+IsRead:boolean
+@Prop({type:String,required:true})
+Content:string
 }
-export const MessageSchema=SchemaFactory.createForClass(Chats)
+export const MessageSchema=SchemaFactory.createForClass(Message)
