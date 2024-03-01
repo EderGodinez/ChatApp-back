@@ -12,7 +12,7 @@ export class MessagesService{
         @InjectModel(User.name)
         private UserModel:Model<User>
     ){}
-    async saveMessage(payload:CreateMessageDto){
+    async saveMessage(payload:CreateMessageDto,IsRead:boolean=false){
         try{
             const {ReceptorId,emitterId}=payload
         const user=this.UserModel.findOne({uid:emitterId})
@@ -21,7 +21,7 @@ export class MessagesService{
         const friend=this.UserModel.findOne({uid:ReceptorId})
         if (friend) {
         }
-        return this.MessageModel.create(payload)
+        return this.MessageModel.create({...payload,IsRead})
         }
         catch(error){
             throw error
@@ -49,17 +49,21 @@ export class MessagesService{
             throw error
         }
     }
-    UpdateMessage(id:string){
+    //Actualiza los mensajes que no ah visto el usuario
+    async UpdateMessages(id:string,receptor:string=''){
     try{
-        const message=this.MessageModel.findOne({_id:id})
-        if (!message) {
-            throw new NotFoundException('Mensaje no existe')
-        }
-    const updatedMessage=this.MessageModel.findOneAndUpdate({_id:id},{IsRead:true})
-    if (!updatedMessage) {
+        const messagesNoRead=await this.MessageModel.countDocuments({chatId:id,IsRead:false,ReceptorId:receptor}).lean()
+        if(messagesNoRead>0){
+            const updatedMessages = await this.MessageModel.updateMany(
+                { chatId: id, ReceptorId: receptor },
+                { $set: { IsRead: true } },
+              ).lean().exec();
+    if (!updatedMessages) {
         throw new InternalServerErrorException('Error al intentar actualizar mensaje con id: '+id)
     }
-    return updatedMessage
+    return 'Mensajes con id'+id+'se actualizaron a leidos'
+        }
+        return  'Mensajes al dia'
     }
     catch(error){
        throw error

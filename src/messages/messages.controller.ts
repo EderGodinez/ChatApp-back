@@ -27,6 +27,6 @@ export class MessagesController{
     @UseGuards()
     @Patch(':id')
     UpdateMessage(@Param('id') id:string){
-        return this.messageService.UpdateMessage(id)
+        return this.messageService.UpdateMessages(id)
     }
 }

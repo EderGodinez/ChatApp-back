@@ -41,7 +41,6 @@ export class UsersController{
     }
     @Patch('/CancelRequest')
     CancelRequest(@Body() request:RequestActions){
-        console.log(request)
          return this.UserService.CancelRequest(request)
     }
     @Patch('/status:id')

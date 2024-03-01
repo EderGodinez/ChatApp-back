@@ -1,4 +1,4 @@
 export interface RequestActions{
-    uid:string,
-    RemitentId:string
+    EmmitterId:string,
+    ReceptorId:string
 }

@@ -12,24 +12,35 @@ export class ChatService {
         @InjectModel(User.name)
         private UserModel:Model<User>){}
         //Los valores seran:
-        /*Clave-El socket Id
-          Valor-Uid del usuario
+        /*Clave-Uid del usuario
+          Valor-El socket Id
         */
-        public ActiveUsers:Record<string,string>={}
-    
+        private ActiveUsers:Record<string,string>={}
+        //Los valores seran:
+        /*Clave-El userid
+          Valor-chatid
+        */
+        private CurrentChat:Record<string,string>={}
+
+
+        JoinChat(chatid:string,uid:string){
+            this.CurrentChat[uid]=chatid
+        }
      async ConnectUser(uid:string,socketId:string){
         try {
-           const user= await this.UserModel.findOneAndUpdate({uid:uid},{IsActive:true})
+           const user= await this.UserModel.findOneAndUpdate({uid:uid},{IsActive:true}, {returnOriginal: false})
             this.ActiveUsers[uid]=socketId
+            return user
           } catch (error) {
               throw error
           }
     }
-     async DisconectUser(socketid:string){
+     async DisconectUser(socketid:string):Promise<User>{
         try {
             const uid=this.FoundUserKey(socketid)
-         const user=await this.UserModel.findOneAndUpdate({uid:uid},{IsActive:false})
+         const user=await this.UserModel.findOneAndUpdate({uid:uid},{IsActive:false}, {returnOriginal: false})
             delete this.ActiveUsers[uid]
+            return user
         } catch (error) {
             throw error
         }
@@ -44,6 +55,9 @@ export class ChatService {
     GetSocketId(uid:string){
         return this.ActiveUsers[uid]
     }
+    GetChatId(uid:string){
+        return this.CurrentChat[uid]
+    }
     getNotifyMessage(from:NotifyProps,Issue:string):MessageProperties{
         switch(Issue){
             case 'Nuevo amigo':
@@ -52,12 +66,24 @@ export class ChatService {
                     ImageUrl:from.photoURL,
                     Issue
                 }
-            case 'Solicitud de amistad':
+            case 'Solicitud':
                 return {
                     Content:`${from.displayName} te ah enviado solicitud de amistad`,
                     ImageUrl:from.photoURL,
                     Issue
                 }
+            case 'Rechazo':
+                    return {
+                        Content:`${from.displayName} rechazo tu solicitud de amistad`,
+                        ImageUrl:from.photoURL,
+                        Issue
+                    }
+            case 'Nuevo chat':
+                        return {
+                            Content:`Se ah creado chat con ${from.displayName}`,
+                            ImageUrl:from.photoURL,
+                            Issue
+                        }
         }
     }
 

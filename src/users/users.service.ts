@@ -64,12 +64,11 @@ constructor(
                  user.Friends[NewFriendId]=ChatId
                  user.FriendshipRequest=user.FriendshipRequest.filter((req)=>req.EmmiterId!==NewFriendId&&req.ReceptorId!==userId)
                  const current= await this.UserModel.findOneAndUpdate({uid:user.uid},user)
-                 console.log('updatedUser',current)
                  ///Agrego a usuario que fue aceptado
                  friend.Friends.push({FriendId:userId,ChatId:ChatId})
+                 friend.Friends[userId]=ChatId
                 friend.FriendshipRequest=friend.FriendshipRequest.filter((req)=>req.EmmiterId!==NewFriendId&&req.ReceptorId!==userId)
                const u= await this.UserModel.findOneAndUpdate({uid:friend.uid},friend)
-               console.log('friendupdate',u)
                         return user
                     } catch (error) {
                         throw error
@@ -80,15 +79,15 @@ constructor(
     }
     async SentRequest(Body:RequestActions){
         try{
-            const {uid,RemitentId}=Body
+            const {EmmitterId,ReceptorId}=Body
             let user=await this.UserModel.findOneAndUpdate(
-                { uid }, // Condición de búsqueda
-                { $push: { FriendshipRequest: { DateSent: new Date(), EmmiterId: uid, ReceptorId: RemitentId } } },
+                { uid:EmmitterId }, // Condición de búsqueda
+                { $push: { FriendshipRequest: { DateSent: new Date(), EmmiterId: EmmitterId, ReceptorId: ReceptorId } } },
                 { new: true } // Para devolver el documento actualizado
               );
             let RemmitentUser=await this.UserModel.findOneAndUpdate(
-                { uid: RemitentId }, // Condición de búsqueda
-                { $push: { FriendshipRequest: { DateSent: new Date(), EmmiterId: uid, ReceptorId: RemitentId } } },
+                { uid: ReceptorId }, // Condición de búsqueda
+                { $push: { FriendshipRequest: { DateSent: new Date(), EmmiterId: EmmitterId, ReceptorId: ReceptorId } } },
                 { new: true } // Para devolver el documento actualizado
               );
             if (!user||!RemmitentUser) {
@@ -101,15 +100,15 @@ constructor(
     }
     async CancelRequest(Body:RequestActions){
         try{
-            const {uid,RemitentId}=Body
+            const {EmmitterId,ReceptorId}=Body
             let user=await this.UserModel.findOneAndUpdate(
-                { uid }, // Condición de búsqueda
-                { $pull: { FriendshipRequest: {  EmmiterId: uid, ReceptorId: RemitentId } } },
+                { uid:EmmitterId }, // Condición de búsqueda
+                { $pull: { FriendshipRequest: {  EmmiterId: EmmitterId, ReceptorId: ReceptorId } } },
                 { new: true } // Para devolver el documento actualizado
               );
             let RemmitentUser=await this.UserModel.findOneAndUpdate(
-                { uid: RemitentId }, // Condición de búsqueda
-                { $pull: { FriendshipRequest: {  EmmiterId: uid, ReceptorId: RemitentId } } },
+                { uid: ReceptorId }, // Condición de búsqueda
+                { $pull: { FriendshipRequest: {  EmmiterId: EmmitterId, ReceptorId: ReceptorId } } },
                 { new: true } // Para devolver el documento actualizado
               );
             if (!user||!RemmitentUser) {
@@ -158,13 +157,16 @@ constructor(
         const userInfo=await this.GetUserbyId(userid)
         const FullUserInfo:FullUser={...userInfo}
         //Obtener los mensajes de chats de amigos del usuario
-        for (let index = 0; index < userInfo.Friends.length; index++) {
-            const friend = userInfo.Friends[index];
-            const Messages = await this.MessagesService.GetMessages(friend.ChatId);
-            FullUserInfo.Friends[index].Messages = Messages;
-          }    
+        if(userInfo.Friends.length>0){
+            for (let index = 0; index < userInfo.Friends.length; index++) {
+                const friend = userInfo.Friends[index];
+                const Messages = await this.MessagesService.GetMessages(friend.ChatId);
+                FullUserInfo.Friends[index].Messages = Messages;
+              }
+        }  
         return FullUserInfo
         } catch (error) {
+            console.error(error)
             throw error
         }
         
