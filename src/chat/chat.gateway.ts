@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { UserService } from './../users/users.service';
 import { WSGuard } from './guards/ws.guard';
 import { CreateMessageDto } from './../messages/dto/CreateMessage.dto';
@@ -10,7 +11,8 @@ import { RequestActions } from 'src/users/dto/RequestActions.dto';
 
 
 //http://localhost:4200/
-@WebSocketGateway(80,{cors:"*"})
+const WEB_PORT=parseInt(process.env.WEBSOCKET_PORT)||81
+@WebSocketGateway(WEB_PORT,{cors:"*"})
 export class ChatGateway implements OnGatewayDisconnect,OnGatewayConnection {
 
     @WebSocketServer()
