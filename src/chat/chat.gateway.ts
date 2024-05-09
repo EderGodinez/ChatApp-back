@@ -20,13 +20,14 @@ export class ChatGateway implements OnGatewayDisconnect,OnGatewayConnection,OnGa
 
   constructor(private readonly ChatService: ChatService,private UserService:UserService,private MessageService:MessagesService) {}
   afterInit(server: any) {
-    console.log(server)
     Logger.log('El servidor inicio correctamente')
   }
   handleConnection(client: any, ...args: any[]) {
+    console.log('conectado')
     try {
       // Aquí, puedes escuchar el evento personalizado del cliente
       client.on('cliente_conectado', async (data: any) => {
+        console.log('conectado')
         const user=await this.ChatService.ConnectUser(data.User.uid, client.id);
         //conectar usuario a salar de amigos
         if(user.Friends.length>0){
