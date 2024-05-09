@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Redirect } from "@nestjs/common";
 import { UserService } from "./users.service";
 import { UpdateListDto } from "./dto/Updatelist.interface";
@@ -27,7 +28,7 @@ export class UsersController{
     GetUserbyId(@Param('id') userid:string){
         return this.UserService.GetUserbyId(userid)
     }
-    @Get('full/:id')
+    @Get('/full:id')
     GetUserFullbyId(@Param('id') userid:string){
         return this.UserService.GetFullInformation(userid)
     }
