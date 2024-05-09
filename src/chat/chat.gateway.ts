@@ -12,7 +12,7 @@ import { json } from 'stream/consumers';
 
 
 //http://localhost:4200/
-@WebSocketGateway(80,{cors:"*"})
+@WebSocketGateway(80,{cors:{origin:'*',credentials:true}})
 export class ChatGateway implements OnGatewayDisconnect,OnGatewayConnection,OnGatewayInit {
 
     @WebSocketServer()
