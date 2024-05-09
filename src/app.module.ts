@@ -9,7 +9,7 @@ import { MessagesModule } from './messages/messages.module';
   imports: [
     ChatModule,
     UsersModule,
-    ConfigModule.forRoot({isGlobal:true}),
+    ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot(process.env.MONGO_URL),
     MessagesModule,
   ],
@@ -17,4 +17,3 @@ import { MessagesModule } from './messages/messages.module';
   providers: [ConfigService],
 })
 export class AppModule {}
-

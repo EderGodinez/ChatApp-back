@@ -1,24 +1,28 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
 import { UserService } from './../users/users.service';
-import { WSGuard } from './guards/ws.guard';
 import { CreateMessageDto } from './../messages/dto/CreateMessage.dto';
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { ChatService } from './chat.service';
 import { Server,Socket } from 'socket.io';
-import {  NotFoundException,  UseGuards } from '@nestjs/common';
+import {  Logger, NotFoundException } from '@nestjs/common';
 import { MessagesService } from 'src/messages/messages.service';
 import { RequestActions } from 'src/users/dto/RequestActions.dto';
+import { json } from 'stream/consumers';
 
 
 //http://localhost:4200/
-const WEB_PORT=parseInt(process.env.WEBSOCKET_PORT)||81
-@WebSocketGateway(WEB_PORT,{cors:"*"})
-export class ChatGateway implements OnGatewayDisconnect,OnGatewayConnection {
+@WebSocketGateway(80,{cors:"*"})
+export class ChatGateway implements OnGatewayDisconnect,OnGatewayConnection,OnGatewayInit {
 
     @WebSocketServer()
     public server: Server;
 
   constructor(private readonly ChatService: ChatService,private UserService:UserService,private MessageService:MessagesService) {}
+  afterInit(server: any) {
+    console.log(server)
+    Logger.log('El servidor inicio correctamente')
+  }
   handleConnection(client: any, ...args: any[]) {
     try {
       // Aquí, puedes escuchar el evento personalizado del cliente
