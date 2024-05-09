@@ -28,7 +28,7 @@ export class UsersController{
     GetUserbyId(@Param('id') userid:string){
         return this.UserService.GetUserbyId(userid)
     }
-    @Get('/full:id')
+    @Get('/full/:id')
     GetUserFullbyId(@Param('id') userid:string){
         return this.UserService.GetFullInformation(userid)
     }
