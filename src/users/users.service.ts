@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 
 import { HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { Model } from "mongoose";

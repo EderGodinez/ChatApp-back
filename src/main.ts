@@ -17,6 +17,8 @@ async function bootstrap() {
     .build();
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, document);
-    await app.listen(3000);
+    const DEFAULT_PORT: number = 3001; // Puerto predeterminado si no se proporciona uno a través de process.env
+    const PORT: number = process.env.APP_PORT ? parseInt(process.env.APP_PORT, 10) : DEFAULT_PORT;
+    await app.listen(PORT);
 }
 bootstrap();

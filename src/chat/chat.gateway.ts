@@ -12,7 +12,9 @@ import { json } from 'stream/consumers';
 
 
 //http://localhost:4200/
-@WebSocketGateway(80,{cors:{origin:'*',credentials:true}})
+const DEFAULT_PORT: number = 81; // Puerto predeterminado si no se proporciona uno a través de process.env
+    const PORT: number = process.env.WEBSOCKET_PORT ? parseInt(process.env.WEBSOCKET_PORT, 10) : DEFAULT_PORT;
+@WebSocketGateway(PORT,{cors:{origin:'*',credentials:true}})
 export class ChatGateway implements OnGatewayDisconnect,OnGatewayConnection,OnGatewayInit {
 
     @WebSocketServer()
@@ -27,7 +29,7 @@ export class ChatGateway implements OnGatewayDisconnect,OnGatewayConnection,OnGa
     try {
       // Aquí, puedes escuchar el evento personalizado del cliente
       client.on('cliente_conectado', async (data: any) => {
-        console.log('conectado')
+        console.log('Se conecto un usuario a socket',client.id)
         const user=await this.ChatService.ConnectUser(data.User.uid, client.id);
         //conectar usuario a salar de amigos
         if(user.Friends.length>0){
