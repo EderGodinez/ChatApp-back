@@ -29,7 +29,6 @@ export class ChatGateway implements OnGatewayDisconnect,OnGatewayConnection,OnGa
     try {
       // Aquí, puedes escuchar el evento personalizado del cliente
       client.on('cliente_conectado', async (data: any) => {
-        console.log('Se conecto un usuario a socket',client.id)
         const user=await this.ChatService.ConnectUser(data.User.uid, client.id);
         //conectar usuario a salar de amigos
         if(user.Friends.length>0){
