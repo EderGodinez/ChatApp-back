@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/*eslint-disable @typescript-eslint/no-unused-vars*/
 /* eslint-disable prettier/prettier */
 import { UserService } from './../users/users.service';
 import { CreateMessageDto } from './../messages/dto/CreateMessage.dto';

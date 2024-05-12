@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {  Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -46,7 +47,7 @@ export class ChatService {
         }
     }
     FoundUserKey(socketid:string){
-        for(let key in this.ActiveUsers){
+        for(const key in this.ActiveUsers){
             if (this.ActiveUsers[key]===socketid) {
                 return key
             }
