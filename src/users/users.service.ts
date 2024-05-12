@@ -7,7 +7,8 @@ import { RequestActions } from "./dto/RequestActions.dto";
 import { AddFriend } from "./dto/AddFriend.dto.interface";
 import { HttpService } from "@nestjs/axios";
 import { catchError, firstValueFrom } from "rxjs";
-import { AxiosError } from "axios";
+import { AxiosError, AxiosResponse } from "axios";
+import { FullUser } from "./interfaces/fullUserInfo.interface";
 @Injectable()
 export class UserService{
 constructor(
@@ -16,7 +17,7 @@ constructor(
 ){}
     async GetUserbyId(userid:string){
     try{
-        const  data  = await firstValueFrom(
+        const  data:AxiosResponse<FullUser>  = await firstValueFrom(
             this.httpService.get<any>(`${process.env.API_URL}/users/${userid}`).pipe(
               catchError((error: AxiosError) => {
                 Logger.error(error.response.data);
@@ -24,7 +25,7 @@ constructor(
               }),
             ),
           );
-       return data
+       return data.data
     }catch(error){
         throw error   
     }
@@ -33,7 +34,7 @@ constructor(
     
     async UpdateFriendslist(Body:AddFriend){
             try {
-                const  data  = await firstValueFrom(
+                const  data:AxiosResponse<FullUser>  = await firstValueFrom(
                     this.httpService.patch<any>(`${process.env.API_URL}/users/friends`,Body).pipe(
                       catchError((error: AxiosError) => {
                         Logger.error(error.response.data);
@@ -41,14 +42,14 @@ constructor(
                       }),
                     ),
                   );
-               return data
+               return data.data
                     } catch (error) {
                         throw error
                     }       
     }
     async SentRequest(Body:RequestActions){
         try{
-            const  data  = await firstValueFrom(
+            const  data:AxiosResponse<FullUser>  = await firstValueFrom(
                 this.httpService.patch<any>(`${process.env.API_URL}/users/SentRequest`,Body).pipe(
                   catchError((error: AxiosError) => {
                     Logger.error(error.response.data);
@@ -56,7 +57,7 @@ constructor(
                   }),
                 ),
               );
-           return data
+           return data.data
         }catch(error){
             throw error
         }

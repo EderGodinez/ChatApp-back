@@ -75,8 +75,8 @@ async handleDisconnect(client: any) {
     }
     //Valida si el receptor esta en el haciendo focus en el mismo chat que el emisor
     const IsReceptorInChat:boolean=this.ChatService.GetChatId[emitterId]===this.ChatService.GetChatId[ReceptorId]
-    const messageSave=await this.MessageService.saveMessage(payload,IsReceptorInChat)
-    const {IsRead,Time,_id,__v}=messageSave
+    const messageSave=await this.MessageService.saveMessage(payload)
+    const {IsRead,Time}=messageSave
     this.server.to(`room_${chatId}`).emit('new_message',{...payload,IsRead,Time});
     }catch(error){
       throw error
@@ -86,7 +86,7 @@ async handleDisconnect(client: any) {
   //@UseGuards(WSGuard)
   @SubscribeMessage('join_chat')
   async JoinChat(@ConnectedSocket() client: Socket,@MessageBody() info:{chatid:string,uid:string}) {
-    const resp =await this.MessageService.UpdateMessages(info.chatid,info.uid)
+    const resp =await this.MessageService.UpdateMessages(info.chatid)
     this.ChatService.JoinChat(info.chatid,info.uid)
     if (resp.includes('dia')) {
     this.server.to(`room_${info.chatid}`).emit('on_chat',null);

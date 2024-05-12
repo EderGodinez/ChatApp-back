@@ -3,24 +3,25 @@ import { Injectable, Logger } from "@nestjs/common";
 import { CreateMessageDto } from "./dto/CreateMessage.dto";
 import { HttpService } from "@nestjs/axios";
 import { catchError, firstValueFrom } from "rxjs";
-import { AxiosError } from "axios";
+import { AxiosError, AxiosResponse } from "axios";
+import { Message } from "./interfaces/messages.interface";
 @Injectable()
 export class MessagesService{
     constructor(
         private readonly httpService: HttpService
 
     ){}
-    async saveMessage(payload:CreateMessageDto){
+    async saveMessage(payload:CreateMessageDto):Promise<Message>{
         try{
-            const  data  = await firstValueFrom(
-                this.httpService.post<any>(`${process.env.API_URL}/messages`,payload).pipe(
+            const response: AxiosResponse<Message>   = await firstValueFrom(
+                this.httpService.post<Message>(`${process.env.API_URL}/messages`,payload).pipe(
                   catchError((error: AxiosError) => {
                     Logger.error(error.response.data);
                     throw 'An error happened!';
                   }),
                 ),
               );
-           return data
+           return response.data
             }
         catch(error){
             throw error
@@ -29,7 +30,7 @@ export class MessagesService{
     //Actualiza los mensajes que no ah visto el usuario
     async UpdateMessages(id:string){
     try{
-        const  data  = await firstValueFrom(
+        const  data:AxiosResponse<string>  = await firstValueFrom(
             this.httpService.patch<any>(`${process.env.API_URL}/messages/${id}`).pipe(
               catchError((error: AxiosError) => {
                 Logger.error(error.response.data);
@@ -37,7 +38,7 @@ export class MessagesService{
               }),
             ),
           );
-       return data
+       return data.data
     }
     catch(error){
        throw error

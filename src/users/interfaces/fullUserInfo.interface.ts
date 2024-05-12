@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Message } from "src/messages/interfaces/messages.interface"
 
 interface Request{
