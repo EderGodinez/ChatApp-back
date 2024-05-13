@@ -17,7 +17,7 @@ export class MessagesService{
                 this.httpService.post<Message>(`${process.env.API_URL}/messages`,payload).pipe(
                   catchError((error: AxiosError) => {
                     Logger.error(error.response.data);
-                    throw 'An error happened!';
+                    throw 'An error happened while saving messages';
                   }),
                 ),
               );
@@ -34,7 +34,7 @@ export class MessagesService{
             this.httpService.patch<any>(`${process.env.API_URL}/messages/${id}`).pipe(
               catchError((error: AxiosError) => {
                 Logger.error(error.response.data);
-                throw 'An error happened!';
+                throw 'An error happened while update messages status!';
               }),
             ),
           );

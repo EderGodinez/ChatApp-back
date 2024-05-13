@@ -21,7 +21,7 @@ constructor(
             this.httpService.get<any>(`${process.env.API_URL}/users/${userid}`).pipe(
               catchError((error: AxiosError) => {
                 Logger.error(error.response.data);
-                throw 'An error happened!';
+                throw 'An error happened while getting user by id!';
               }),
             ),
           );
@@ -38,7 +38,7 @@ constructor(
                     this.httpService.patch<any>(`${process.env.API_URL}/users/friends`,Body).pipe(
                       catchError((error: AxiosError) => {
                         Logger.error(error.response.data);
-                        throw 'An error happened!';
+                        throw 'An error happened while updated friend list!';
                       }),
                     ),
                   );
@@ -53,7 +53,7 @@ constructor(
                 this.httpService.patch<any>(`${process.env.API_URL}/users/SentRequest`,Body).pipe(
                   catchError((error: AxiosError) => {
                     Logger.error(error.response.data);
-                    throw 'An error happened!';
+                    throw 'An error happened while sending request!';
                   }),
                 ),
               );
@@ -68,7 +68,7 @@ constructor(
                 this.httpService.patch<any>(`${process.env.API_URL}/users/CancelRequest`,Body).pipe(
                   catchError((error: AxiosError) => {
                     Logger.error(error.response.data);
-                    throw 'An error happened!';
+                    throw 'An error happened while cancel request!';
                   }),
                 ),
               );
