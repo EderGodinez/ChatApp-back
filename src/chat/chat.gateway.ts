@@ -31,7 +31,7 @@ export class ChatGateway implements OnGatewayDisconnect,OnGatewayConnection,OnGa
       client.on('cliente_conectado', async (data: any) => {
         const user=await this.ChatService.ConnectUser(data.User.uid, client.id);
         //conectar usuario a salar de amigos
-        if(user.Friends.length>0){
+        if(user.Friends){
           user.Friends.forEach(room => {
             client.join(`room_${room.ChatId}`)  
             const SocketId=this.ChatService.GetSocketId(room.FriendId)
