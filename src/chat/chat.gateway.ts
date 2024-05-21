@@ -9,6 +9,7 @@ import {  Logger, NotFoundException } from '@nestjs/common';
 import { MessagesService } from 'src/messages/messages.service';
 import { RequestActions } from 'src/users/dto/RequestActions.dto';
 import { json } from 'stream/consumers';
+import { throwError } from 'rxjs';
 
 
 //http://localhost:4200/
@@ -25,21 +26,22 @@ export class ChatGateway implements OnGatewayDisconnect,OnGatewayConnection,OnGa
     Logger.log('El servidor inicio correctamente')
   }
   handleConnection(client: any, ...args: any[]) {
-    console.log('conectado')
     try {
       // Aquí, puedes escuchar el evento personalizado del cliente
       client.on('cliente_conectado', async (data: any) => {
         const user=await this.ChatService.ConnectUser(data.User.uid, client.id);
         //conectar usuario a salar de amigos
-        if(user.Friends){
-          user.Friends.forEach(room => {
-            client.join(`room_${room.ChatId}`)  
-            const SocketId=this.ChatService.GetSocketId(room.FriendId)
-             const targetSocket = this.server.sockets.sockets.get(SocketId);
-            if (targetSocket) {
-            targetSocket.emit('handle_friend_status', {userid:user.uid,IsActive:user.IsActive});
-           }  
-          });
+        if(user){
+          if (user.Friends&&user.Friends.length>0) {
+            user.Friends.forEach(room => {
+              client.join(`room_${room.ChatId}`)  
+              const SocketId=this.ChatService.GetSocketId(room.FriendId)
+               const targetSocket = this.server.sockets.sockets.get(SocketId);
+              if (targetSocket) {
+              targetSocket.emit('handle_friend_status', {userid:user.uid,IsActive:user.IsActive});
+             }  
+            });  
+          }
         }
         
         client.emit('UserWelcome',{displayName:data.User.displayName,photoURL:data.User.photoURL})
@@ -112,13 +114,18 @@ async handleDisconnect(client: any) {
   //@UseGuards(WSGuard)
   @SubscribeMessage('Cancel_R')
   async CancelRequest(@ConnectedSocket() client:Socket,@MessageBody() body:RequestActions){
+    try {
     //Se realiza la camcelacion en BD
     await this.UserService.CancelRequest(body)
     const SocketId=this.ChatService.GetSocketId(body.ReceptorId)
     const targetSocket = this.server.sockets.sockets.get(SocketId);
     if (targetSocket) {
       targetSocket.emit('request_cancel', body.EmmitterId);
+    }  
+    } catch (error) {
+     throw new Error(error) 
     }
+    
   }
  // @UseGuards(WSGuard)
   @SubscribeMessage('Accept_R')
@@ -128,6 +135,7 @@ async handleDisconnect(client: any) {
     const UserRemittent=await this.UserService.GetUserbyId(body.ReceptorId)
       const EmmitterMessage=this.ChatService.getNotifyMessage({displayName:UserRemittent.displayName,photoURL:UserRemittent.photoURL},'Nuevo chat')
     client.emit('new_friend',{friend:UserEmmitter.Friends[UserEmmitter.Friends.length-1],Message:EmmitterMessage})
+    client.join(`room_${UserEmmitter.Friends[UserEmmitter.Friends.length-1].ChatId}`)
     //Se obtienen los id para enviar la info
     const FriendSocketId=this.ChatService.GetSocketId(body.ReceptorId)
     const targetFriend = this.server.sockets.sockets.get(FriendSocketId);
@@ -135,6 +143,7 @@ async handleDisconnect(client: any) {
       //  Armar mensaje
       const RemmitentMessage=this.ChatService.getNotifyMessage({displayName:UserEmmitter.displayName,photoURL:UserEmmitter.photoURL},'Nuevo amigo')
       // Enviar el mensaje al usuario específico
+      targetFriend.join(`room_${UserRemittent.Friends[UserRemittent.Friends.length-1].ChatId}`)
       targetFriend.emit('new_friend', {friend:UserRemittent.Friends[UserRemittent.Friends.length-1],Message:RemmitentMessage}); 
     }
   }
@@ -155,16 +164,21 @@ async handleDisconnect(client: any) {
   //@UseGuards(WSGuard)
   @SubscribeMessage('Sent_R')
   async SentRequest(@ConnectedSocket()client:Socket,@MessageBody() body:RequestActions){
-    const Emmitter=await this.UserService.SentRequest(body)
-    const Receptor=await this.UserService.GetUserbyId(body.ReceptorId)
-    const SocketId=this.ChatService.GetSocketId(body.ReceptorId)
-    const targetSocket = this.server.sockets.sockets.get(SocketId);
-    if (targetSocket) {
-      //  Armar mensaje
-      const content=this.ChatService.getNotifyMessage({displayName:Emmitter.displayName,photoURL:Emmitter.photoURL},'Solicitud')
-      // Enviar el mensaje al usuario 
-      targetSocket.emit('new_request', {req:Receptor.FriendshipRequest[Receptor.FriendshipRequest.length-1],message:content});
+    try {
+      const Emmitter=await this.UserService.sendRequest(body)
+      const Receptor=await this.UserService.GetUserbyId(body.ReceptorId)
+      const SocketId=this.ChatService.GetSocketId(body.ReceptorId)
+      const targetSocket = this.server.sockets.sockets.get(SocketId);
+      if (targetSocket) {
+        //  Armar mensaje
+        const content=this.ChatService.getNotifyMessage({displayName:Emmitter.displayName,photoURL:Emmitter.photoURL},'Solicitud')
+        // Enviar el mensaje al usuario 
+        targetSocket.emit('new_request', {req:Receptor.FriendshipRequest[Receptor.FriendshipRequest.length-1],message:content});
+      }  
+    } catch (error) {
+      throw new Error(error)
     }
+    
   }
   @SubscribeMessage('cliente_conectado')
   async connectUser(@ConnectedSocket() client:Socket,@MessageBody() data:any){
